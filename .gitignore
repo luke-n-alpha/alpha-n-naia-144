@@ -1,0 +1,42 @@
+# Build artifacts
+/build/
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.exe.bin
+*.img
+*.ima
+
+# Floppy / disk images (final artifact lives in build/)
+disk.img
+floppy.img
+
+# Temp / work
+.agents/work/
+tmp/
+*.tmp
+*.swp
+*.bak
+*~
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Toolchain caches
+.zig-cache/
+zig-out/
+.cache/
+compile_commands.json
+
+# Python tools (if used)
+__pycache__/
+*.pyc
+.venv/

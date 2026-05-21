@@ -1,0 +1,91 @@
+{
+  "$schema_version": "0.1",
+  "project": "alpha-n-naia-144",
+  "owner": "luke_n_alpha",
+  "doc_version": "Draft v0.1",
+  "doc_date": "2026-05-21",
+  "language_sot": "ko",
+  "mandatory_reads": [
+    "docs/00-charter/charter.md",
+    "docs/00-charter/ai-roles.md",
+    "docs/00-charter/sdlc-process.md",
+    ".agents/context/agents-rules.json",
+    ".agents/context/project-index.yaml"
+  ],
+  "principles": {
+    "sdlc_strict": {
+      "rule": "단계별 게이트 우회 금지. HU 명시적 진입 신호 후 다음 단계 진입.",
+      "ref": "docs/00-charter/sdlc-process.md §5"
+    },
+    "multi_ai_ensemble": {
+      "rule": "cross-review/judge는 최소 2개 이상 AI 호출. 단일 AI 외주 금지.",
+      "ref": "memory:feedback_pi_substrate_not_glm_only_2026_05_20"
+    },
+    "ai_leads_human_executes": {
+      "rule": "AI는 로컬 코드/문서/커밋 OK. push·외부 배포·공모전 제출은 HU 실행.",
+      "ref": "memory:feedback_ai_leads_human_executes_serverenv"
+    },
+    "size_budget_first": {
+      "rule": "모든 결정은 사이즈 예산 항목 기재 후 진행.",
+      "ref": "docs/02-design/size-budget.md (Gate 2 작성 예정)"
+    },
+    "honest_meta_disclosure": {
+      "rule": "결정·실패·되돌리기 모두 commit + progress 보고서에 정직하게 남김. 사후 미화 금지.",
+      "ref": "docs/00-charter/charter.md §2 G2"
+    }
+  },
+  "hard_constraints": {
+    "C1_size": {
+      "limit_bytes": 1474560,
+      "measure": "압축 해제 후 du -b",
+      "source": "공모전 규정"
+    },
+    "C2_standalone": {
+      "rule": "독립 실행파일, 웹 게임 금지",
+      "source": "공모전 규정"
+    },
+    "C3_deadline": {
+      "contest_deadline": "2026-09-04T23:39:00+09:00",
+      "internal_lock": "2026-08-31T23:59:00+09:00",
+      "buffer_days": 4
+    },
+    "C4_original": {
+      "rule": "공모전 공개 후 제작, git log 첫 commit으로 증빙",
+      "source": "공모전 규정"
+    },
+    "C5_content_guide": {
+      "rule": "지나친 성적 묘사·폭력 금지 (자체 심의 ≈ ESRB T)",
+      "source": "공모전 규정"
+    },
+    "C6_jamo_graphics": {
+      "rule": "한글 자모 그래픽 시스템 사용 (본 프로젝트 차별점)",
+      "source": "docs/00-charter/charter.md §5"
+    }
+  },
+  "gates": [
+    {"id": 0, "name": "Charter", "period": "2026-05-21 ~ 2026-05-24", "status": "in_progress"},
+    {"id": 1, "name": "Requirements", "period": "2026-05-25 ~ 2026-05-31", "status": "pending"},
+    {"id": 2, "name": "Design", "period": "2026-06-01 ~ 2026-06-14", "status": "pending"},
+    {"id": 3, "name": "Engine Core", "period": "2026-06-15 ~ 2026-07-12", "status": "pending"},
+    {"id": 4, "name": "Game Content", "period": "2026-07-13 ~ 2026-08-09", "status": "pending"},
+    {"id": 5, "name": "Testing & Size", "period": "2026-08-10 ~ 2026-08-23", "status": "pending"},
+    {"id": 6, "name": "Deployment", "period": "2026-08-24 ~ 2026-08-31", "status": "pending"},
+    {"id": 7, "name": "Post-release", "period": "2026-09-05 ~", "status": "pending"}
+  ],
+  "ai_roster": {
+    "CL": {"tool": "Claude (Opus)", "role": "orchestrator"},
+    "CX": {"tool": "Codex (GPT-5)", "role": "system_architect"},
+    "GE": {"tool": "Gemini", "role": "design_ux_critic"},
+    "GL": {"tool": "GLM", "role": "korean_narrative_reviewer"},
+    "OC": {"tool": "Opencode", "role": "build_engineer"}
+  },
+  "human_roster": {
+    "HU": {"name": "luke", "role": "approver_executor"}
+  },
+  "workfile_lifecycle": {
+    "draft": "docs/0N-*/",
+    "progress_active": ".agents/progress/<topic>-YYYY-MM-DD.md",
+    "progress_archive": ".agents/progress/archive/YYYY-MM/",
+    "temp": [".agents/work/", "tmp/"]
+  }
+}

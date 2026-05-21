@@ -2,9 +2,11 @@
 
 > 한글 자모를 그래픽 타일로 사용하는 1.44MB 디스켓 게임 + 그것을 위해 자체 구현한 터미널/폰트 렌더 엔진.
 
-**상태:** Charter 단계 (SDLC Gate 0) — 요구사항 정의 전.
+**상태:** 방법론 응용 실험 진행 중 — 생성 계약 v0.2 확정, 첫 모듈 생성 대기.
 **소속:** `luke_n_alpha/alpha-n-naia-144` (개인 프로젝트).
-**라이선스:** TBD (오픈소스 공개 예정, 구체 라이선스는 Charter 검토 이후 결정).
+**라이선스:** TBD (오픈소스 공개 예정).
+
+> **2026-05-22 전환**: 기존 SDLC 게이트 방식에서 **특허 10-2026-0056403(멀티에이전트 상호 검증 프레임워크)의 방법론을 게임 개발 전체에 응용하는 자율 실험**로 전환. 사용자(luke)는 방향을 제공하지 않고, 다수 AI 에이전트가 생성 계약 기반으로 자율 개발. 상세는 [`docs/00-charter/methodology-research.md`](docs/00-charter/methodology-research.md).
 
 ---
 
@@ -16,6 +18,7 @@
 
 1. **출품**: 2PGameArcade *1.44MB 게임 공모전* (마감 2026-09-04 23:39).
 2. **공개**: "AI(Claude/Codex/Gemini/GLM/Opencode 등 멀티 도구)로 어떻게 게임을 개발하는가"의 살아있는 사례를 오픈소스로 공개.
+3. **실증**: 특허 10-2026-0056403(멀티에이전트 상호 검증 프레임워크)의 방법론을 실제 프로젝트에 응용하여, 검증→생성 확장의 실효성을 증명.
 
 게임은 1.44MB 한 장에 자급자족. AI 개발 메타는 commit 히스토리 · 산출물 문서 · 세션 로그로 외부에 드러난다.
 
@@ -33,18 +36,15 @@ alpha-n-naia-144/
 ├── README.md                       # 본 문서
 ├── AGENTS.md = CLAUDE.md = GEMINI.md   # 멀티툴 entry (동일 내용)
 ├── .agents/                        # AI SoT
-│   ├── context/                    # 규칙·인덱스 (rules + project-index)
-│   ├── progress/                   # 단계 진행 보고서
+│   ├── context/                    # 규칙·인덱스
+│   ├── progress/                   # 진행 보고서
 │   └── work/                       # 임시 작업 (gitignored)
 ├── .users/ko/context/              # 사람용 한국어 mirror
-├── docs/                           # SDLC 산출물
-│   ├── 00-charter/                 # 헌장 · AI 역할 · 프로세스
-│   ├── 01-requirements/            # 요구사항
-│   ├── 02-design/                  # 설계
-│   ├── 03-implementation/          # 구현 노트
-│   ├── 04-testing/                 # 테스트 계획·결과
-│   ├── 05-deployment/              # 배포 (디스켓 이미지 · 공모전 제출)
-│   └── 06-maintenance/             # 유지보수 · 오픈소스 운영
+├── docs/
+│   ├── 00-charter/                 # 방법론, 조직, 프로세스, 세션 로그
+│   ├── contracts/                  # 생성 계약 (tech-stack, size-budget, interfaces, tile-spec)
+│   ├── rounds/                     # 라운드별 검증 기록
+│   └── 01-06/                      # (legacy SDLC placeholder — 미사용)
 ├── src/                            # 소스코드
 ├── assets/{fonts,scenarios,sfx}/   # 폰트·시나리오·사운드
 ├── tests/                          # 테스트
@@ -52,21 +52,27 @@ alpha-n-naia-144/
 └── build/                          # 빌드 산출물 (gitignored)
 ```
 
-## SDLC
+## 방법론
 
-이 프로젝트는 규모는 작지만 **SDLC를 철저히 준수**한다. 각 단계 산출물은 `docs/0N-*` 하위에 두고, 사용자(luke) 검토 게이트를 통과해야 다음 단계 진행. 상세는 [`docs/00-charter/sdlc-process.md`](docs/00-charter/sdlc-process.md).
+특허 10-2026-0056403(멀티에이전트 상호 검증 프레임워크)의 방법론을 게임 개발 전체에 응용.
+독립 생성 → 제약 검사 → 후보 병합 → 다중 검증 → 수렴. 생성 계약 기반 좁은 모듈 단위 진행.
+상세: [`methodology-research.md`](docs/00-charter/methodology-research.md) → [`agent-organization.md`](docs/00-charter/agent-organization.md) → [`process-and-deliverables.md`](docs/00-charter/process-and-deliverables.md).
 
-## AI 협업
+## AI 에이전트
 
-본 프로젝트는 단일 AI가 아닌 **멀티 도구 앙상블**로 진행한다. 역할 분담과 RACI는 [`docs/00-charter/ai-roles.md`](docs/00-charter/ai-roles.md).
+| ID | 모델 | 역할 |
+|----|------|------|
+| OC | GLM/Opencode | 오케스트레이터 + 중재 |
+| CX | Codex | 생성자 + 검증자 (시스템/엔진) |
+| GE | Gemini | 생성자 + 검증자 (시각/UX) |
+
+상세: [`agent-organization.md`](docs/00-charter/agent-organization.md).
 
 ## 진행 상태
 
-- [x] **Gate 0 — Charter**: 헌장 · AI 역할 · SDLC 프로세스 정의 (현재 단계, 사용자 검토 대기)
-- [ ] **Gate 1 — Requirements**
-- [ ] **Gate 2 — Design**
-- [ ] **Gate 3 — Implementation (engine core)**
-- [ ] **Gate 4 — Implementation (game content)**
-- [ ] **Gate 5 — Testing & Size budget close**
-- [ ] **Gate 6 — Deployment (disk image + 공모전 제출)**
-- [ ] **Gate 7 — Post-release (오픈소스 공개)**
+- [x] **Phase 0 — 방법론 설계**: 갭 분석 + 3-AI 교차 리뷰 + 조직/프로세스 설계
+- [x] **Phase A-1 — 생성 계약**: tech-stack, size-budget, interfaces, tile-spec v0.2 확정
+- [ ] **Phase A-2 — 첫 모듈 생성**: 타일셋 또는 폰트 렌더러
+- [ ] **Phase B — 엔진 코어**: 렌더 백엔드, 게임 루프, 입력
+- [ ] **Phase C — 게임 콘텐츠**: 시나리오, 챕터, NPC
+- [ ] **Phase D — 통합·제출**: 디스켓 이미지, 공모전 제출 (2026-09-04)

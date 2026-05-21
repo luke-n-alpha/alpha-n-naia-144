@@ -2,7 +2,7 @@
 
 **세션 유형:** 방법론 응용 연구 + 조직/프로세스 설계
 **참여자:** luke (HU), Opencode/GLM (OC-orchestrator), Codex/GPT-5.4 (CX), Gemini (GE)
-**상태:** Phase 0 완료, Phase A-1 진입 대기
+**상태:** Phase 0 완료, Phase A-2 진입 대기. 문서 구조 정합성 수정 완료.
 
 ---
 
@@ -146,3 +146,20 @@ Phase A-1: 생성 계약 정의
 - `docs/contracts/tech-stack.md` — 언어/플랫폼 결정
 
 절차: OC 초안 → CX + GE 독립 리뷰 → 투표 → 확정
+
+### [T11] 문서 구조 정합성 수정
+
+luke 리뷰: "나중에 자율로 바뀌었다는 내용이 제대로 기록이 안 된 것 같아"
+
+문제 진단:
+- entry 파일(AGENTS.md/CLAUDE.md/GEMINI.md)이 여전히 "SDLC 철저 준수" 지시
+- README.md 본문은 SDLC Gate 체크리스트 유지
+- 구 charter 3종(charter.md, ai-roles.md, sdlc-process.md)에 deprecation 없음
+- docs/01-06 README 전부 Gate 기반
+
+수정:
+1. AGENTS.md / CLAUDE.md / GEMINI.md 전면 재작성 → 특허 방법론 기반
+2. README.md 본문 갱신 (방법론 섹션, Phase 진행 상태, 에이전트 테이블)
+3. 구 charter 3종에 DEPRECATED 헤더 추가
+4. docs/01-06 README 6종에 DEPRECATED 헤더 추가
+5. .users/ko/context/README.md 용어 갱신 (SDLC/Gate → 방법론/Phase)

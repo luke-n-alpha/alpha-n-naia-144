@@ -1,6 +1,8 @@
 # Gate 3-4 — Implementation
 
-**상태:** Pending
+> **⚠ DEPRECATED (2026-05-22)**: SDLC 게이트 방식에서 특허 방법론(생성 계약 기반 모듈 단위)으로 전환됨. 구현은 이제 `docs/00-charter/process-and-deliverables.md`의 Phase A-D로 진행.
+
+**상태:** Deprecated
 **기간:** 2026-06-15 ~ 2026-08-09 (8주, Engine 4주 + Game 4주)
 
 ## 산출물 계획

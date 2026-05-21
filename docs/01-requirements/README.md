@@ -1,6 +1,8 @@
 # Gate 1 — Requirements
 
-**상태:** Pending (Gate 0 통과 후 시작)
+> **⚠ DEPRECATED (2026-05-22)**: SDLC 게이트 방식에서 특허 방법론(생성 계약 기반 모듈 단위)으로 전환됨. 요구사항은 이제 `docs/contracts/`의 생성 계약과 `docs/00-charter/process-and-deliverables.md`의 Phase별 산출물로 관리.
+
+**상태:** Deprecated
 **기간:** 2026-05-25 ~ 2026-05-31 (1주)
 
 ## 산출물 계획

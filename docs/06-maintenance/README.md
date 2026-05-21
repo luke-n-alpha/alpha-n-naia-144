@@ -1,6 +1,8 @@
 # Gate 7 — Post-release & Maintenance
 
-**상태:** Pending
+> **⚠ DEPRECATED (2026-05-22)**: SDLC 게이트 방식에서 특허 방법론으로 전환됨. 공모전 제출 이후 오픈소스 공개는 Phase D 완료 후 진행.
+
+**상태:** Deprecated
 **기간:** 2026-09-05 ~
 
 ## 산출물 계획

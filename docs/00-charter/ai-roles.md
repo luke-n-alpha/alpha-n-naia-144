@@ -1,6 +1,8 @@
 # AI 역할 분담 + RACI — alpha-n-naia-144
 
-**문서 상태:** Draft v0.1 (Gate 0)
+> **⚠ DEPRECATED (2026-05-22)**: 본 문서는 SDLC 게이트 방식 기반 역할 분담. 방법론 전환 이후 `agent-organization.md`로 대체. 새 에이전트 풀(OC/CX/GE)과 퇴출 규칙은 해당 문서 참조.
+
+**문서 상태:** Deprecated (SDLC → 특허 방법론 전환)
 **작성일:** 2026-05-21
 **기반 원칙:** 멀티 AI 앙상블 ([[feedback_pi_substrate_not_glm_only_2026_05_20]]), AI 리드 · 사람 실행 ([[feedback_ai_leads_human_executes_serverenv]])
 

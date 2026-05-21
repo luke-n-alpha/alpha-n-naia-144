@@ -1,6 +1,8 @@
 # 프로젝트 헌장 — alpha-n-naia-144
 
-**문서 상태:** Draft v0.1 (Gate 0)
+> **⚠ DEPRECATED (2026-05-22)**: 본 문서는 SDLC 게이트 방식 기반으로 작성됨. 방법론 전환 이후 `methodology-research.md`가 비전·제약의 소스로 대체. 역할은 `agent-organization.md`, 프로세스는 `process-and-deliverables.md`를 참조.
+
+**문서 상태:** Deprecated (SDLC → 특허 방법론 전환)
 **작성일:** 2026-05-21
 **작성:** Claude (오케스트레이터, 본 세션) · 사용자 검토 대기
 **언어:** 한국어 (SoT)

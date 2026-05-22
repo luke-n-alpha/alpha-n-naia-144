@@ -125,6 +125,27 @@ static void test_save_roundtrip(void) {
     if (strcmp(buf, data) == 0) PASS(); else FAIL("mismatch");
 }
 
+static void test_save_exact_fit_nul(void) {
+    TEST("save_read exact-fit stays NUL terminated");
+    char data[16];
+    char buf[8];
+    int len;
+    int i;
+
+    for (i = 0; i < (int)sizeof(data); i++) data[i] = 'A' + i;
+
+    save_erase(1);
+    if (save_write(1, data, sizeof(buf)) != 0) { FAIL("write"); return; }
+
+    memset(buf, 'X', sizeof(buf));
+    len = save_read(1, buf, sizeof(buf));
+    save_erase(1);
+
+    if (len != (int)sizeof(buf) - 1) { FAIL("unexpected length"); return; }
+    if (buf[sizeof(buf) - 1] != '\0') { FAIL("missing NUL"); return; }
+    PASS();
+}
+
 static void test_save_oob(void) {
     TEST("save OOB slot rejected");
     if (save_write(-1, "x", 1) != 0 && save_write(3, "x", 1) != 0)
@@ -168,20 +189,27 @@ static void test_game_full_run(void) {
         scene_handle_key(KEY_CONFIRM);
 
     int chapter_reached = g_state.chapter;
-    int scenes_visited = 0;
-    int prev_scene = -1;
+    int ending_reached = 0;
+    int ending_id = -1;
 
     for (int attempt = 0; attempt < 10000; attempt++) {
         SceneType sc = scene_current();
-        if (sc != prev_scene) scenes_visited++;
-        prev_scene = sc;
-        if (sc == SCENE_ENDING || sc == SCENE_TITLE) break;
         if (g_state.chapter > chapter_reached) chapter_reached = g_state.chapter;
+        if (sc == SCENE_ENDING) {
+            ending_reached = 1;
+            ending_id = g_state.current_ending;
+            scene_handle_key(KEY_CONFIRM);
+            break;
+        }
+        if (sc == SCENE_TITLE) break;
 
         if (sc == SCENE_CAFE) {
-            scene_handle_key(KEY_CONFIRM);
-            if (scene_current() == SCENE_CAFE) scene_handle_key(KEY_DOWN);
-            if (scene_current() == SCENE_CAFE) scene_handle_key(KEY_MENU);
+            int step;
+            for (step = 0; step < 4 && scene_current() == SCENE_CAFE; step++) {
+                scene_handle_key(KEY_CONFIRM);
+                if (scene_current() == SCENE_CAFE)
+                    scene_handle_key(KEY_DOWN);
+            }
         } else if (sc == SCENE_DIALOG) {
             scene_handle_key(KEY_CONFIRM);
         } else if (sc == SCENE_BATTLE) {
@@ -191,21 +219,21 @@ static void test_game_full_run(void) {
             scene_handle_key(KEY_RIGHT);
             scene_update(100);
         } else if (sc == SCENE_ATELIER) {
-            scene_handle_key(KEY_CONFIRM);
+            scene_handle_key(g_state.chapter >= 3 ? KEY_CONFIRM : KEY_CANCEL);
         } else {
             break;
         }
     }
 
-    int reached_ending = (scene_current() == SCENE_ENDING);
     input_shutdown();
     render_shutdown();
-    if (reached_ending && chapter_reached >= 3)
-        PASS();
-    else if (scenes_visited > 6)
+    if (ending_reached &&
+        scene_current() == SCENE_TITLE &&
+        chapter_reached >= 4 &&
+        ending_id >= 0 && ending_id <= 2)
         PASS();
     else
-        FAIL("game stuck");
+        FAIL("game did not complete");
 }
 
 int main(void) {
@@ -236,6 +264,7 @@ int main(void) {
 
     printf("\n[Save]\n");
     test_save_roundtrip();
+    test_save_exact_fit_nul();
     test_save_oob();
 
     printf("\n[Integration]\n");

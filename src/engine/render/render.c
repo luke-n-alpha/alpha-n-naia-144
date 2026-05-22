@@ -43,6 +43,79 @@ typedef struct {
 static PixelCell pixel_buf[SCREEN_ROWS][SCREEN_COLS];
 static int pixel_dirty[SCREEN_ROWS][SCREEN_COLS];
 
+static int utf8_decode(const char **utf8, uint32_t *out_cp) {
+    const uint8_t *p = (const uint8_t *)*utf8;
+
+    if (!p[0]) return 0;
+
+    if (p[0] < 0x80) {
+        *out_cp = p[0];
+        *utf8 += 1;
+        return 1;
+    }
+    if ((p[0] & 0xE0) == 0xC0 && p[1]) {
+        *out_cp = ((uint32_t)(p[0] & 0x1F) << 6) | (uint32_t)(p[1] & 0x3F);
+        *utf8 += 2;
+        return 1;
+    }
+    if ((p[0] & 0xF0) == 0xE0 && p[1] && p[2]) {
+        *out_cp = ((uint32_t)(p[0] & 0x0F) << 12) |
+                  ((uint32_t)(p[1] & 0x3F) << 6) |
+                  (uint32_t)(p[2] & 0x3F);
+        *utf8 += 3;
+        return 1;
+    }
+    if ((p[0] & 0xF8) == 0xF0 && p[1] && p[2] && p[3]) {
+        *out_cp = ((uint32_t)(p[0] & 0x07) << 18) |
+                  ((uint32_t)(p[1] & 0x3F) << 12) |
+                  ((uint32_t)(p[2] & 0x3F) << 6) |
+                  (uint32_t)(p[3] & 0x3F);
+        *utf8 += 4;
+        return 1;
+    }
+
+    *utf8 += 1;
+    return -1;
+}
+
+static int decompose_hangul_compat(uint32_t cp, uint32_t out[3]) {
+    static const uint16_t lead_map[19] = {
+        0x3131, 0x3132, 0x3134, 0x3137, 0x3138, 0x3139, 0x3141, 0x3142, 0x3143,
+        0x3145, 0x3146, 0x3147, 0x3148, 0x3149, 0x314A, 0x314B, 0x314C, 0x314D,
+        0x314E
+    };
+    static const uint16_t vowel_map[21] = {
+        0x314F, 0x3150, 0x3151, 0x3152, 0x3153, 0x3154, 0x3155, 0x3156, 0x3157,
+        0x3158, 0x3159, 0x315A, 0x315B, 0x315C, 0x315D, 0x315E, 0x315F, 0x3160,
+        0x3161, 0x3162, 0x3163
+    };
+    static const uint16_t tail_map[28] = {
+        0x0000, 0x3131, 0x3132, 0x3133, 0x3134, 0x3135, 0x3136, 0x3137, 0x3139,
+        0x313A, 0x313B, 0x313C, 0x313D, 0x313E, 0x313F, 0x3140, 0x3141, 0x3142,
+        0x3144, 0x3145, 0x3146, 0x3147, 0x3148, 0x314A, 0x314B, 0x314C, 0x314D,
+        0x314E
+    };
+    uint32_t s_index;
+    uint32_t lead_idx;
+    uint32_t vowel_idx;
+    uint32_t tail_idx;
+
+    if (cp < 0xAC00 || cp > 0xD7A3) return 0;
+
+    s_index = cp - 0xAC00;
+    lead_idx = s_index / 588;
+    vowel_idx = (s_index % 588) / 28;
+    tail_idx = s_index % 28;
+
+    out[0] = lead_map[lead_idx];
+    out[1] = vowel_map[vowel_idx];
+    if (tail_idx) {
+        out[2] = tail_map[tail_idx];
+        return 3;
+    }
+    return 2;
+}
+
 int render_init(RenderMode mode) {
     printf("\033[?25l");
     printf("\033[2J");
@@ -161,17 +234,30 @@ int text_putc(int row, int col, uint32_t ch, uint8_t fg, uint8_t bg) {
 }
 
 int text_puts(int row, int col, const char *utf8, uint8_t fg, uint8_t bg) {
+    uint32_t cp;
+
     if (!utf8) return -1;
-    int c = col;
+    {
+        int c = col;
     while (*utf8 && c < SCREEN_COLS) {
-        uint32_t cp = 0;
-        const uint8_t *p = (const uint8_t *)utf8;
-        if (p[0] < 0x80) { cp = p[0]; utf8 += 1; }
-        else if ((p[0] & 0xE0) == 0xC0) { cp = (p[0] & 0x1F) << 6 | (p[1] & 0x3F); utf8 += 2; }
-        else if ((p[0] & 0xF0) == 0xE0) { cp = (p[0] & 0x0F) << 12 | (p[1] & 0x3F) << 6 | (p[2] & 0x3F); utf8 += 3; }
-        else { utf8 += 1; continue; }
+        uint32_t jamo[3];
+        int n;
+
+        n = utf8_decode(&utf8, &cp);
+        if (n <= 0) continue;
+
+        n = decompose_hangul_compat(cp, jamo);
+        if (n > 0) {
+            int i;
+            for (i = 0; i < n && c < SCREEN_COLS; i++, c++) {
+                text_putc(row, c, jamo[i], fg, bg);
+            }
+            continue;
+        }
+
         text_putc(row, c, cp, fg, bg);
         c++;
+    }
     }
     return 0;
 }

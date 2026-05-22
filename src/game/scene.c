@@ -128,7 +128,6 @@ int scene_exit(void) {
 int scene_enter(SceneType scene) {
     current_scene = scene;
     cursor = 0;
-    battle_done = 0;
     render_set_mode(scene == SCENE_BATTLE ? RENDER_PIXEL : RENDER_TEXT);
     if (scene == SCENE_BATTLE) {
         battle_start(g_state.chapter + 1);
@@ -146,7 +145,7 @@ int scene_update(uint32_t delta_ms) {
                 g_state.naia_restore += 10 + g_state.chapter * 5;
                 g_state.puzzles_solved++;
                 battle_done = 1;
-                dialog_start(10 + g_state.chapter);
+                dialog_start(20 + g_state.chapter);
                 scene_enter(SCENE_DIALOG);
                 return 0;
             }
@@ -195,6 +194,7 @@ GameKey scene_handle_key(GameKey key) {
         if (key == KEY_CONFIRM) {
             if (cursor == 0) {
                 memset(&g_state, 0, sizeof(g_state));
+                battle_done = 0;
                 srand((unsigned)time(NULL));
                 dialog_start(0);
                 scene_enter(SCENE_DIALOG);
@@ -210,7 +210,7 @@ GameKey scene_handle_key(GameKey key) {
             g_state.puzzles_solved++;
             g_state.naia_restore += 5 + g_state.chapter * 3;
             g_state.alpha_trust += 3;
-            dialog_start(1 + cursor + g_state.chapter * 4);
+            dialog_start(1 + cursor + g_state.chapter * 5);
             scene_enter(SCENE_DIALOG);
         }
         if (key == KEY_MENU && g_state.chapter >= 2)

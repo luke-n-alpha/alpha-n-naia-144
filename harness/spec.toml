@@ -1,0 +1,85 @@
+[harness]
+spec = "spec.toml"
+store = ".harness/store.json"
+log_dir = ".harness/logs"
+
+[agents.OC]
+role = "orchestrator"
+model = "opencode"
+capabilities = ["dispatch", "merge", "gate_control", "log"]
+
+[agents.CX]
+role = "creator_reviewer"
+model = "codex"
+domain = "system_engine"
+capabilities = ["generate", "review_code", "size_check"]
+
+[agents.GE]
+role = "creator_reviewer"
+model = "gemini"
+domain = "visual_ux"
+capabilities = ["generate", "review_visual", "narrative_check"]
+
+[pipeline]
+  [pipeline.phase_0]
+  name = "contract_definition"
+  agent = "OC"
+  gate = "contracts_written"
+  required_artifacts = ["docs/contracts/*.md"]
+
+  [pipeline.phase_a1]
+  name = "first_module_generation"
+  agents = ["CX", "GE"]
+  mode = "independent"
+  gate = "both_submitted"
+  required_artifacts = ["docs/candidates/*"]
+
+  [pipeline.phase_a2]
+  name = "merge_and_review"
+  agent = "OC"
+  gate = "review_passed"
+  requires_approval = true
+
+  [pipeline.phase_b]
+  name = "engine_core"
+  agent = "CX"
+  reviewer = "GE"
+  gate = "code_review_pass"
+  requires_approval = true
+
+  [pipeline.phase_c]
+  name = "game_content"
+  agent = "GE"
+  reviewer = "CX"
+  gate = "content_review_pass"
+
+  [pipeline.phase_d]
+  name = "integration"
+  agent = "OC"
+  gate = "all_tests_pass"
+  requires_approval = true
+
+[gates]
+  [gates.contracts_written]
+  check = "file_exists('docs/contracts/tech-stack.md') and file_exists('docs/contracts/interfaces.md')"
+
+  [gates.both_submitted]
+  check = "count_files('docs/candidates/') >= 2"
+
+  [gates.review_passed]
+  check = "file_exists_latest('docs/rounds/review-*.md') and parse_review_result() == 'PASS'"
+
+  [gates.code_review_pass]
+  check = "latest_review_severity() != 'CRITICAL'"
+
+  [gates.all_tests_pass]
+  check = "run('make test').returncode == 0"
+
+[approval]
+  type = "human"
+  prompt_template = "Phase {phase} 완료. 산출물: {artifacts}. 승인하시겠습니까?"
+
+[receiver_proxy]
+  enabled = true
+  perspective = "first_time_viewer"
+  checks = ["readable", "runnable", "documented"]

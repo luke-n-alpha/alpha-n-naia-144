@@ -13,6 +13,8 @@ SRCS = $(SRC_DIR)/main.c \
        $(SRC_DIR)/engine/input/input.c \
        $(SRC_DIR)/game/scene.c \
        $(SRC_DIR)/game/dialog.c \
+       $(SRC_DIR)/game/battle.c \
+       $(SRC_DIR)/game/save.c \
        $(SRC_DIR)/game/world.c
 
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)

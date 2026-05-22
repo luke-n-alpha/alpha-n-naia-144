@@ -13,13 +13,15 @@ typedef struct {
 } GlyphBitmap;
 
 typedef struct {
-    uint16_t codepoint;
+    uint32_t codepoint;
     uint8_t  index;
 } GlyphEntry;
 
 #define GLYPH_ASCII_START  0x20
 #define GLYPH_ASCII_COUNT  95
+#define GLYPH_JAMO_START   0x3131
 #define GLYPH_JAMO_COUNT   68
+#define GLYPH_BOX_START    0x2500
 #define GLYPH_BOX_COUNT    40
 #define GLYPH_TOTAL        (GLYPH_ASCII_COUNT + GLYPH_JAMO_COUNT + GLYPH_BOX_COUNT)
 

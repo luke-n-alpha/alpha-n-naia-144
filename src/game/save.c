@@ -13,8 +13,9 @@ int save_write(int slot, const char *data, int len) {
     FILE *f = fopen(path, "wb");
     if (!f) return -3;
     fwrite(&len, sizeof(int), 1, f);
-    fwrite(data, 1, len, f);
+    int wrote = fwrite(data, 1, len, f);
     fclose(f);
+    if (wrote != len) return -4;
     return 0;
 }
 
@@ -27,8 +28,10 @@ int save_read(int slot, char *data, int buf_size) {
     int len = 0;
     fread(&len, sizeof(int), 1, f);
     if (len <= 0 || len > buf_size) { fclose(f); return -3; }
-    fread(data, 1, len, f);
+    int read_n = fread(data, 1, len, f);
     fclose(f);
+    if (read_n != len) return -4;
+    if (len < buf_size) data[len] = '\0';
     return len;
 }
 

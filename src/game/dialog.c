@@ -105,7 +105,7 @@ static const DLine d_ch2_window[] = {
 static const DLine d_ch3_intro[] = {
     {SP_NARR, "가을. 2층 아틀리에의 문이 열렸다."},
     {SP_NARR, "벽에 걸린 그림들이 밝기로 떨리고 있다."},
-    {SP_ALPHA, "이곳에 naia의 기억이 농춮되어 있습니다."},
+    {SP_ALPHA, "이곳에 naia의 기억이 농축되어 있습니다."},
     {SP_ALPHA, "리듬 정렬으로 안정화할 수 있습니다."},
     {-1, NULL}
 };

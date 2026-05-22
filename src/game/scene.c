@@ -120,6 +120,11 @@ static void draw_ending(void) {
 
 SceneType scene_current(void) { return current_scene; }
 
+int scene_exit(void) {
+    render_shutdown();
+    return 0;
+}
+
 int scene_enter(SceneType scene) {
     current_scene = scene;
     cursor = 0;
@@ -153,9 +158,18 @@ int scene_update(uint32_t delta_ms) {
     return 0;
 }
 
+static int battle_required(void) {
+    return g_state.chapter >= 2;
+}
+
 static void advance_chapter(void) {
+    if (battle_required() && !battle_done) {
+        scene_enter(SCENE_BATTLE);
+        return;
+    }
     g_state.chapter++;
     g_state.puzzles_solved = 0;
+    battle_done = 0;
     memset(g_state.cafe_explored, 0, sizeof(g_state.cafe_explored));
     if (g_state.chapter >= 4) {
         if (g_state.naia_restore >= 60 && g_state.alpha_trust >= 20)

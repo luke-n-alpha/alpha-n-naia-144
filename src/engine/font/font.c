@@ -4,6 +4,10 @@
 static int cp_to_index(uint32_t cp) {
     if (cp >= GLYPH_ASCII_START && cp < GLYPH_ASCII_START + GLYPH_ASCII_COUNT)
         return cp - GLYPH_ASCII_START;
+    if (cp >= GLYPH_JAMO_START && cp < GLYPH_JAMO_START + GLYPH_JAMO_COUNT)
+        return GLYPH_ASCII_COUNT + (cp - GLYPH_JAMO_START);
+    if (cp >= GLYPH_BOX_START && cp < GLYPH_BOX_START + GLYPH_BOX_COUNT)
+        return GLYPH_ASCII_COUNT + GLYPH_JAMO_COUNT + (cp - GLYPH_BOX_START);
     return -1;
 }
 

@@ -19,7 +19,25 @@ SRCS = $(SRC_DIR)/main.c \
 
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 
+LIB_SRCS = $(SRC_DIR)/engine/font/font.c \
+           $(SRC_DIR)/engine/font/glyph_data.c \
+           $(SRC_DIR)/engine/render/render.c \
+           $(SRC_DIR)/engine/input/input.c \
+           $(SRC_DIR)/game/scene.c \
+           $(SRC_DIR)/game/dialog.c \
+           $(SRC_DIR)/game/battle.c \
+           $(SRC_DIR)/game/save.c \
+           $(SRC_DIR)/game/world.c
+
 all: $(TARGET)
+
+test: $(BUILD_DIR)/test_all.o $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(LIB_SRCS))
+	$(CC) $(LDFLAGS) -o $(BUILD_DIR)/test_runner $^ -lm
+	./$(BUILD_DIR)/test_runner
+
+$(BUILD_DIR)/test_all.o: tests/test_all.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -I$(SRC_DIR) -c $< -o $@
 
 $(TARGET): $(OBJS)
 	@mkdir -p $(BUILD_DIR)

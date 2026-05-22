@@ -20,6 +20,7 @@ static int spawn_timer = 0;
 static int spawn_interval = 800;
 static int total_notes = 0;
 static int notes_hit = 0;
+static int notes_spawned = 0;
 
 static const uint32_t jamo_chars[LANE_COUNT] = {
     0x3131, 0x3134, 0x3137, 0x3139
@@ -35,6 +36,7 @@ int battle_start(int diff) {
     spawn_timer = 0;
     total_notes = 8 + diff * 4;
     notes_hit = 0;
+    notes_spawned = 0;
     spawn_interval = 600 - diff * 80;
     if (spawn_interval < 200) spawn_interval = 200;
     memset(notes, 0, sizeof(notes));
@@ -50,6 +52,7 @@ static void spawn_note(void) {
             notes[i].speed = 1 + difficulty / 2;
             notes[i].active = 1;
             note_count++;
+            notes_spawned++;
             return;
         }
     }
@@ -57,7 +60,7 @@ static void spawn_note(void) {
 
 int battle_update(uint32_t delta_ms) {
     spawn_timer += delta_ms;
-    if (spawn_timer >= spawn_interval && notes_hit + note_count < total_notes) {
+    if (spawn_timer >= spawn_interval && notes_spawned < total_notes) {
         spawn_note();
         spawn_timer = 0;
     }
@@ -72,6 +75,7 @@ int battle_update(uint32_t delta_ms) {
     }
 
     if (notes_hit >= total_notes) return 1;
+    if (notes_spawned >= total_notes && note_count == 0) return 1;
     return 0;
 }
 

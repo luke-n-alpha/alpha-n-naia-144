@@ -8,7 +8,7 @@
 #define FRAME_MS (1000 / FPS)
 
 int main(void) {
-    if (render_init() != 0) {
+    if (render_init(RENDER_TEXT) != 0) {
         fprintf(stderr, "render init failed\n");
         return 1;
     }

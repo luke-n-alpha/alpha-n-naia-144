@@ -17,7 +17,7 @@ typedef struct {
     int height;
 } ScreenSize;
 
-int render_init(void);
+int render_init(RenderMode mode);
 int render_set_mode(RenderMode mode);
 int render_flush(void);
 int render_clear(void);

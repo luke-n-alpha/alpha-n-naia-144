@@ -36,15 +36,28 @@ static TextCell *cell_at(TextCell *buf, int row, int col) {
     return &buf[row * SCREEN_COLS + col];
 }
 
-int render_init(void) {
+typedef struct {
+    uint8_t sub[16][8];
+} PixelCell;
+
+static PixelCell pixel_buf[SCREEN_ROWS][SCREEN_COLS];
+static int pixel_dirty[SCREEN_ROWS][SCREEN_COLS];
+
+int render_init(RenderMode mode) {
     printf("\033[?25l");
     printf("\033[2J");
     memset(vbuf, 0, sizeof(vbuf));
+    memset(pixel_buf, 0, sizeof(pixel_buf));
+    memset(pixel_dirty, 0, sizeof(pixel_dirty));
     active_buf = 0;
+    current_mode = mode;
     return 0;
 }
 
 int render_set_mode(RenderMode mode) {
+    if (mode != RENDER_TEXT && mode != RENDER_PIXEL) return -1;
+    if (mode == RENDER_PIXEL && current_mode != RENDER_PIXEL)
+        memset(pixel_buf, 0, sizeof(pixel_buf));
     current_mode = mode;
     return 0;
 }
@@ -63,28 +76,55 @@ int render_flush(void) {
     TextCell *front = vbuf[active_buf];
     TextCell *back  = vbuf[1 - active_buf];
 
-    printf("\033[H");
-    for (int r = 0; r < SCREEN_ROWS; r++) {
-        for (int c = 0; c < SCREEN_COLS; c++) {
-            TextCell *f = &front[r * SCREEN_COLS + c];
-            TextCell *b = &back[r * SCREEN_COLS + c];
-            if (f->fg != b->fg || f->bg != b->bg) ansi_color(f->fg, f->bg);
-            if (f->ch != b->ch) {
+    if (current_mode == RENDER_PIXEL) {
+        for (int r = 0; r < SCREEN_ROWS; r++) {
+            for (int c = 0; c < SCREEN_COLS; c++) {
+                if (!pixel_dirty[r][c]) continue;
+                pixel_dirty[r][c] = 0;
+                PixelCell *pc = &pixel_buf[r][c];
                 printf("\033[%d;%dH", r + 1, c + 1);
-                ansi_color(f->fg, f->bg);
-                if (f->ch < 128) {
-                    putchar(f->ch);
-                } else {
-                    char mb[5] = {0};
-                    if (f->ch < 0x800) {
-                        mb[0] = 0xC0 | (f->ch >> 6);
-                        mb[1] = 0x80 | (f->ch & 0x3F);
-                    } else if (f->ch < 0x10000) {
-                        mb[0] = 0xE0 | (f->ch >> 12);
-                        mb[1] = 0x80 | ((f->ch >> 6) & 0x3F);
-                        mb[2] = 0x80 | (f->ch & 0x3F);
+                uint8_t dominant = pc->sub[0][0];
+                unsigned int sum = 0;
+                int count = 0;
+                for (int sy = 0; sy < 16; sy++) {
+                    for (int sx = 0; sx < 8; sx++) {
+                        if (pc->sub[sy][sx] == dominant) count++;
+                        sum += pc->sub[sy][sx];
                     }
-                    fputs(mb, stdout);
+                }
+                uint8_t avg = (uint8_t)(sum / 128);
+                if (count == 128) {
+                    ansi_color(dominant, dominant);
+                } else {
+                    ansi_color(avg, avg);
+                }
+                putchar(0xE2); putchar(0x96); putchar(0x88);
+            }
+        }
+    } else {
+        printf("\033[H");
+        for (int r = 0; r < SCREEN_ROWS; r++) {
+            for (int c = 0; c < SCREEN_COLS; c++) {
+                TextCell *f = &front[r * SCREEN_COLS + c];
+                TextCell *b = &back[r * SCREEN_COLS + c];
+                if (f->fg != b->fg || f->bg != b->bg) ansi_color(f->fg, f->bg);
+                if (f->ch != b->ch) {
+                    printf("\033[%d;%dH", r + 1, c + 1);
+                    ansi_color(f->fg, f->bg);
+                    if (f->ch < 128) {
+                        putchar(f->ch);
+                    } else {
+                        char mb[5] = {0};
+                        if (f->ch < 0x800) {
+                            mb[0] = 0xC0 | (f->ch >> 6);
+                            mb[1] = 0x80 | (f->ch & 0x3F);
+                        } else if (f->ch < 0x10000) {
+                            mb[0] = 0xE0 | (f->ch >> 12);
+                            mb[1] = 0x80 | ((f->ch >> 6) & 0x3F);
+                            mb[2] = 0x80 | (f->ch & 0x3F);
+                        }
+                        fputs(mb, stdout);
+                    }
                 }
             }
         }
@@ -144,14 +184,19 @@ int text_fill(int row, int col, int w, int h, uint32_t ch, uint8_t fg, uint8_t b
 }
 
 int pixel_set(int x, int y, uint8_t color_idx) {
+    if (color_idx >= PALETTE_SIZE) return -1;
     int col = x / 8;
     int row = y / 16;
     if (row < 0 || row >= SCREEN_ROWS || col < 0 || col >= SCREEN_COLS) return -1;
-    text_putc(row, col, 0x2588, color_idx, color_idx);
+    int sx = x % 8;
+    int sy = y % 16;
+    pixel_buf[row][col].sub[sy][sx] = color_idx;
+    pixel_dirty[row][col] = 1;
     return 0;
 }
 
 int pixel_fill_rect(int x, int y, int w, int h, uint8_t color_idx) {
+    if (color_idx >= PALETTE_SIZE) return -1;
     for (int py = y; py < y + h; py++)
         for (int px = x; px < x + w; px++)
             pixel_set(px, py, color_idx);

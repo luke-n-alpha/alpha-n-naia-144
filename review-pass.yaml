@@ -1,0 +1,34 @@
+# 크로스리뷰 리뷰어 = 플래그십 트리오 (claude/codex/glm-5.1). gemini-CLI 제외(느림).
+# 정책: 리뷰어=플래그십(검증=고위험), 자동동기화=라이트(별도). dual-process.
+# 정본 SoT = naia-adk/naia-settings/review.json (이 파일은 project-local override/미러).
+tools:
+  claude:
+    command: 'claude -p --output-format json --allowedTools "Read,Glob,Grep" --max-turns 5'
+    stdin: true
+    parse: json
+  codex:
+    command: 'codex exec "{prompt}" --sandbox read-only --skip-git-repo-check'
+    stdin: false
+    parse: text_fallback
+  opencode:
+    command: 'opencode run "{prompt}" --dir "{repo}" -m openrouter/z-ai/glm-5.1'
+    stdin: false
+    parse: text_fallback
+
+stages:
+  planning:
+    reviewers: [claude, codex, opencode]
+    arbiter: null          # 3-리뷰어 → CONTESTED 는 사용자 escalation (전원 플래그십이라 외부 arbiter 없음)
+    convergence: 1
+  development:
+    reviewers: [claude, codex, opencode]
+    arbiter: null
+    convergence: 2
+  test:
+    reviewers: [claude, codex, opencode]
+    arbiter: null
+    convergence: 1
+  integration:
+    reviewers: [claude, codex, opencode]
+    arbiter: null
+    convergence: 2

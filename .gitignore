@@ -2,3 +2,16 @@ build/
 *.o
 *.d
 .tmp/
+
+# self-trust 하네스 — harden 2026-05-30
+# T3 보안: 키/시크릿/개인정보 (절대 추적 금지, README 마커만)
+data-private/
+!data-private/README.md
+# AI 작업 임시물 + 주기 검증 러너 산출물 (로그/상태/PID)
+.agents/work/
+# 세션/툴 로컬 설정
+.claude/
+# 보류 격리(Quarantine) — 방치/보류 자산 백업. 실물 제외, MANIFEST/README 만 추적
+quarantine/*
+!quarantine/MANIFEST.json
+!quarantine/README.md

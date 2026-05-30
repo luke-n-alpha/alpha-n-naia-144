@@ -23,6 +23,7 @@
 - [게임 디자인](./game-design.md) — 게임 개요·세계관
 - [기술 스택](./contracts/tech-stack.md) · [사이즈 예산](./contracts/size-budget.md) · [인터페이스](./contracts/interfaces.md) · [타일 규격](./contracts/tile-spec.md)
 - [게임 디자인 계약](./contracts/game-design.md) · [리뷰 라운드 1](./contracts/review-round-1.md)
+- [자모 비트맵 생성 계약 (슬라이스1, 2026-05-30)](./contracts/jamo-bitmap-gen-2026-05-30.md) — Phase A-2 실제 자모 생성
 
 ## SDLC 단계 (01–06)
 

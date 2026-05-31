@@ -1,0 +1,31 @@
+{
+  "id": "slice1-bucket02-jamo-font",
+  "goal": "한글 자모(+대사 1줄용 최소 ASCII) 글리프를 8×16 1-bit로 자체 인코딩하고, bucket① Glyph8x16/Cell 인터페이스 위에 lookup + 문자열→Cell 배치 헬퍼를 제공한다. OS 폰트 API 미사용(NFR5).",
+  "non_goal": [
+    "퍼즐 로직/타일 상태(FR3)",
+    "입력/커서 이동(FR2)",
+    "승리조건/대사 분기(FR5)",
+    "사운드",
+    "bucket① 렌더 코어 코드 수정(core.*/platform.*/main.c)"
+  ],
+  "generator": { "actor_id": "codex:gpt-5.4", "run_id": "slice1-bucket02-2026-05-31" },
+  "judge": { "actor_id": "gemini", "kind": "external-ai" },
+  "allowed_paths": ["font.h", "font.c", "font_selftest.c", "Makefile"],
+  "forbidden_paths": ["core.c", "core.h", "platform.h", "platform_headless.c", "platform_linux_x11.c", "main.c"],
+  "anchors": [
+    { "ref": "bucket① Glyph8x16{rows[16]}/Cell/core_set_cell — 폰트는 이 위에 글리프만 공급(MSB-first 비트)", "locator": "core.h" },
+    { "ref": "slice1 설계: HC4 자모 8×16 1-bit px-control + NFR5 OS폰트 API 금지(자체 렌더)", "locator": "../../../.agents/progress/naia-144-slice1-design-2026-05-31.md" }
+  ],
+  "acceptance": [
+    { "criterion": "자모+최소 ASCII 글리프가 8×16 1-bit로 자체 인코딩되고 OS 폰트 API(FT_/fontconfig/CreateFont/XLoadFont) 미사용", "covered_by": ["t-font"] },
+    { "criterion": "각 글리프가 독립 명세된 기대 지문(글리프별 on-pixel 수 + 테이블 전체 해시 상수)과 일치 — 글리프 데이터 단일 바이트 손상 시 self-check RED", "covered_by": ["t-font"] },
+    { "criterion": "문자열/자모 시퀀스→Cell 그리드 배치 헬퍼가 core_set_cell과 정합(셀 좌표 매핑·범위 밖 무시)", "covered_by": ["t-font"] }
+  ],
+  "falsifiers": [
+    { "id": "t-font", "cmd": "make fonttest", "expect_exit": 0, "cwd": ".", "timeout_s": 120, "mutation_target": "font.c" }
+  ],
+  "budget": { "max_window_tokens": 1000000, "user_cap_tokens": 250000, "ratio": 0.25 },
+  "complexity_caps": { "fanout_cap": 2, "artifact_cap": 4, "interface_cap": 3, "new_concept_cap": 2 },
+  "risk_flags": [],
+  "handoff_pack": { "summary_max_tokens": 500, "must_include": ["추가 파일 목록", "인코딩한 글리프 집합(자모/ASCII 목록)", "falsifier(make fonttest) 결과", "core.*/platform.*/main.c 미변경 확인"] }
+}

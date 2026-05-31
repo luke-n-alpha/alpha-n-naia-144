@@ -116,39 +116,32 @@ static void test_save_roundtrip(void) {
     TEST("save write/read roundtrip");
     const char *data = "ch:2,nr:45,at:12";
     save_erase(0);
-    if (save_write(0, data, strlen(data)) != 0) { FAIL("write"); return; }
+    if (save_write(0, data) != OK) { FAIL("write"); return; }
     char buf[256];
     memset(buf, 'X', sizeof(buf));
-    int len = save_read(0, buf, sizeof(buf));
+    int rc = save_read(0, buf, sizeof(buf));
     save_erase(0);
-    if (len < 0) { FAIL("read"); return; }
+    if (rc != OK) { FAIL("read"); return; }
     if (strcmp(buf, data) == 0) PASS(); else FAIL("mismatch");
 }
 
+/* interfaces.md §6 conform: state_id 는 NUL 종단 문자열. buf 가 작으면 무손실 거부(silent truncation 금지).
+ * (구 truncation 동작 검증을 계약-conformant 동작 검증으로 교체.) */
 static void test_save_exact_fit_nul(void) {
-    TEST("save_read exact-fit stays NUL terminated");
-    char data[16];
+    TEST("save_read rejects too-small buffer (no silent truncation)");
+    const char *data = "ABCDEFGHIJKLMNO";   /* 15 + NUL = 16 */
     char buf[8];
-    int len;
-    int i;
-
-    for (i = 0; i < (int)sizeof(data); i++) data[i] = 'A' + i;
-
     save_erase(1);
-    if (save_write(1, data, sizeof(buf)) != 0) { FAIL("write"); return; }
-
+    if (save_write(1, data) != OK) { FAIL("write"); return; }
     memset(buf, 'X', sizeof(buf));
-    len = save_read(1, buf, sizeof(buf));
+    int rc = save_read(1, buf, sizeof(buf));   /* 16 > 8 -> 거부 */
     save_erase(1);
-
-    if (len != (int)sizeof(buf) - 1) { FAIL("unexpected length"); return; }
-    if (buf[sizeof(buf) - 1] != '\0') { FAIL("missing NUL"); return; }
-    PASS();
+    if (rc < 0) PASS(); else FAIL("should reject small buffer");
 }
 
 static void test_save_oob(void) {
     TEST("save OOB slot rejected");
-    if (save_write(-1, "x", 1) != 0 && save_write(3, "x", 1) != 0)
+    if (save_write(-1, "x") != OK && save_write(3, "x") != OK)
         PASS();
     else FAIL("should reject");
 }

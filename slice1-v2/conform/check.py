@@ -80,7 +80,8 @@ def check_region(reg: dict) -> dict:
 
 def regions_for_file(path: str, man: dict) -> list[dict]:
     b = os.path.basename(path)
-    return [r for r in man["regions"] if b in (r["header"], r["source"])]
+    return [r for r in man["regions"]
+            if b in (os.path.basename(r["header"]), os.path.basename(r["source"]))]
 
 
 def _load_state() -> dict:

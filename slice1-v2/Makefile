@@ -8,7 +8,7 @@ HEADLESS_BIN := $(BUILD_DIR)/naia144_headless
 GUI_BIN := $(BUILD_DIR)/naia144_x11
 HEADLESS_DUMP := $(BUILD_DIR)/headless_dump.txt
 
-.PHONY: all make_dirs headless test fonttest gametest game-gui audiotest clean
+.PHONY: all make_dirs headless test fonttest gametest game-gui audiotest conform clean
 
 all: $(GUI_BIN)
 
@@ -88,6 +88,13 @@ audiotest: make_dirs audio.c audio.h audio_selftest.c
 	./$(BUILD_DIR)/audio_selftest > $(BUILD_DIR)/audio_selftest.txt
 	grep -q '^audio_selftest=PASS$$' $(BUILD_DIR)/audio_selftest.txt
 	@echo "audiotest=PASS"
+
+# Contract<->code conformance gate (deterministic, 0 tokens, no LLM).
+# Edit-time enforcement = .agents/hooks/conform-gate.js (PostToolUse). This target
+# is the manual/CI sweep. Catches the daf35d0 false-success class (signature-drift
+# / contract-only / code-only) that surface gates miss.
+conform:
+	@python3 conform/check.py --all
 
 clean:
 	rm -rf $(BUILD_DIR)

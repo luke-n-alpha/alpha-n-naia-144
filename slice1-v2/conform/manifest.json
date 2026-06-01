@@ -1,0 +1,13 @@
+{
+  "_doc": "Contract<->code regions for the conform gate. Each region = a header (contract) + source (code). 'expect' = known public symbols the extractor MUST recover (sanity gate, so an empty parse can't masquerade as 'drift 0').",
+  "regions": [
+    {"name": "game",  "header": "game.h",  "source": "game.c",
+     "expect": ["game_init_seeded", "game_init", "game_handle_key", "game_dump"]},
+    {"name": "core",  "header": "core.h",  "source": "core.c",
+     "expect": ["core_init", "core_rasterize"]},
+    {"name": "font",  "header": "font.h",  "source": "font.c",
+     "expect": ["font_get_glyph", "font_selftest"]},
+    {"name": "audio", "header": "audio.h", "source": "audio.c",
+     "expect": ["audio_fill", "audio_selftest"]}
+  ]
+}
